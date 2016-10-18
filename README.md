@@ -1,0 +1,2 @@
+# LogEx
+LogEx class.
