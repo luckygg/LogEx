@@ -4,8 +4,9 @@
 
 #pragma once
 #include "LogEx.h"
-#include "StringConvert.h"
 // CFTech_LogExDlg dialog
+
+enum ELogList {Log_Error, Log_Total, Log_Max};
 class CFTech_LogExDlg : public CDialogEx
 {
 // Construction
@@ -18,15 +19,9 @@ public:
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
+private :
+	CLogEx m_Log[Log_Max];
 public :
-	CLogEx m_Log;
-	bool m_bWork;
-	bool m_bSave;
-	void OnAddLog(int nThId);
-	void OnAddLog2();
-
-	char* CStringToChar(CString strIn);
-	bool CStringToChar(const CString strIn, char* pchOut);
 // Implementation
 protected:
 	HICON m_hIcon;

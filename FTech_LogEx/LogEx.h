@@ -8,16 +8,6 @@ enum ELogType
 	LogType_ERR			// Error.
 };
 
-enum ELogList
-{
-	LogList_ERROR,		// Error log.
-	LogList_JOB,		// JOB log.
-	LogList_TOTAL,		// Total log.
-	LogList_TCPIP,		// TCP/IP log.
-	LogList_RS232,		// RS232 log.
-	LogList_MAX			// Enum max count.
-};
-
 // Log base class.
 class CLogBase
 {
@@ -41,16 +31,16 @@ public:
 	void SetBufferSize(UINT nBufferSize) { m_nBufferSize = nBufferSize; }
 	void SetAddTime(bool bEnable) {	m_bTime = bEnable; }
 
-	void WriteLogMsg(ELogType nLogType, CString strMsg);
+	bool WriteLogMsg(ELogType nLogType, CString strMsg);
 
-	void Write(CString strBuffer=L"");
+	bool Write(CString strBuffer=L"");
 };
 
 class CLogEx
 {
 public:
-	static CLogEx* Instance();
-	static void Release();
+	static CLogEx*	Instance();
+	static void		Release();
 private:
 	static CLogEx* _instance;
 
@@ -59,15 +49,14 @@ public:
 	~CLogEx(void);
 
 private:
-	CLogBase m_Log[LogList_MAX];
+	CLogBase m_LogBase;
+	bool m_bInit;
 	bool IsExistDir(CString strPath) { 
 		if (GetFileAttributes(strPath) == -1) return false; 
 	else return true; 
 	} // -1 is No Exist
 	void CreateDir(CString Path) { CreateDirectory(Path,NULL); }
 public:
-	void Initialize(CString strPath);
-	void WriteLogMsg(ELogList nLogList, ELogType nLogType, CString strFmt, ...);
-	void OnWriteNowAll();
-	void OnWriteNowAt(ELogList nLogList);
+	void SetFolderPathName(CString strPath, CString strName);
+	bool WriteLogMsg(ELogType nLogType, CString strFmt, ...);
 };

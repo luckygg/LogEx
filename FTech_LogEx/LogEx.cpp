@@ -30,10 +30,10 @@ CString CLogBase::GetFileName()
 	return strFilePath;
 }
 
-void CLogBase::WriteLogMsg(ELogType nLogType, CString strMsg)
+bool CLogBase::WriteLogMsg(ELogType nLogType, CString strMsg)
 {
 	if(strMsg.GetLength() < 1)
-		return;
+		return false;
 
 	CString strLogText=L"";
 	CString strType=L"";
@@ -59,14 +59,13 @@ void CLogBase::WriteLogMsg(ELogType nLogType, CString strMsg)
 	
 	strMsg = strLogText;
 
-	Write(strMsg);
-	
+	return Write(strMsg);
 }
 
-void CLogBase::Write(CString strBuffer)
+bool CLogBase::Write(CString strBuffer)
 {
 	if( m_strFolderPath.GetLength() < 1 || m_strFileName.GetLength() < 1 )
-		return;
+		return false;
 
 	FILE *file=NULL;
 	CString strFilePath=L"";
@@ -76,6 +75,7 @@ void CLogBase::Write(CString strBuffer)
 	char cFilePath[MAX_BUFFER_SIZE]={0,};
 	CStringConvert::CStringToChar(strFilePath, cFilePath);
 
+	bool ret=false;
 	if(fopen_s( &file, cFilePath, "a+t" ) == 0 )
 	{
 		char cBuffer[MAX_BUFFER_SIZE]={0,};
@@ -84,15 +84,19 @@ void CLogBase::Write(CString strBuffer)
 		fprintf(file, "%s\n", cBuffer);
 
 		fclose(file);
+		ret = true;
 	}
 	else
 	{
 		CString msg=L"";
 		msg.Format(L"Log File open Fail! (%s)\n", strFilePath);
 		OutputDebugString(msg);
+		ret = false;
 	}
 
 	SetBufferSize(m_nBufferSize);
+
+	return ret;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -120,17 +124,20 @@ void CLogEx::Release()
 
 CLogEx::CLogEx( void )
 {
+	m_bInit = false;
 }
 
 CLogEx::~CLogEx(void)
 {
+	m_bInit = false;
 }
 
-void CLogEx::WriteLogMsg(ELogList nLogList, ELogType nLogType, CString strFmt, ...)
+bool CLogEx::WriteLogMsg(ELogType nLogType, CString strFmt, ...)
 {
+	if (m_bInit == false) return false;
 	char cFmt[MAX_BUFFER_SIZE]={0,};
 	CStringConvert::CStringToChar(strFmt,cFmt);
-	
+
 	char buf[MAX_BUFFER_SIZE]={0,};
 	va_list vlist;
 	va_start(vlist, strFmt);
@@ -138,36 +145,27 @@ void CLogEx::WriteLogMsg(ELogList nLogList, ELogType nLogType, CString strFmt, .
 	va_end(vlist);
 
 	CString strTemp=L"";
-	
+
 	CString tmp = (CString)buf;
 	strTemp.Format(L"MSG: %s",tmp);
 
 	char cTemp[MAX_BUFFER_SIZE]={0,};
 	CStringConvert::CStringToChar(strTemp,cTemp);
-	
+
 	sprintf_s(buf,cTemp);
 
-	m_Log[nLogList].WriteLogMsg(nLogType, strTemp);
+	return m_LogBase.WriteLogMsg(nLogType, strTemp);
 }
 
-void CLogEx::OnWriteNowAll()
-{
-	for(int i = 0; i < LogList_MAX; i++)
-		m_Log[i].Write();
-}
-
-void CLogEx::OnWriteNowAt(ELogList nLogList)
-{
-	m_Log[nLogList].Write();
-}
-
-void CLogEx::Initialize(CString strPath)
+void CLogEx::SetFolderPathName(CString strPath, CString strName)
 {
 	if (IsExistDir(strPath) == false)
 		CreateDir(strPath);
 	
 	strPath+=L"\\";
 
-	m_Log[LogList_TOTAL].SetFileName(L"Total Log");
-	m_Log[LogList_TOTAL].SetFolderPath(strPath);
+	m_LogBase.SetFileName(strName);
+	m_LogBase.SetFolderPath(strPath);
+
+	m_bInit = true;
 }

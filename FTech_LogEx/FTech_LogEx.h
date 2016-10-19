@@ -10,7 +10,6 @@
 
 #include "resource.h"		// main symbols
 
-
 // CFTech_LogExApp:
 // See FTech_LogEx.cpp for the implementation of this class
 //
@@ -19,7 +18,7 @@ class CFTech_LogExApp : public CWinApp
 {
 public:
 	CFTech_LogExApp();
-
+	
 // Overrides
 public:
 	virtual BOOL InitInstance();
