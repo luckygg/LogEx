@@ -6,13 +6,13 @@
 #include "LogEx.h"
 // CFTech_LogExDlg dialog
 
-enum ELogList {Log_Error, Log_Total, Log_Max};
 class CFTech_LogExDlg : public CDialogEx
 {
 // Construction
 public:
 	CFTech_LogExDlg(CWnd* pParent = NULL);	// standard constructor
 
+	typedef enum {eError=0, eTotal, eMax} ELogList ;
 // Dialog Data
 	enum { IDD = IDD_FTECH_LOGEX_DIALOG };
 
@@ -20,7 +20,7 @@ public:
 	virtual void DoDataExchange(CDataExchange* pDX);	// DDX/DDV support
 
 private :
-	CLogEx m_Log[Log_Max];
+	CLogEx m_Log[eMax];
 public :
 // Implementation
 protected:

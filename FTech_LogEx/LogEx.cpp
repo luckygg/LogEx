@@ -1,5 +1,4 @@
 #include "StdAfx.h"
-#include "StringConvert.h"
 #include "LogEx.h"
 
 CLogBase::CLogBase(void)
@@ -25,7 +24,7 @@ CString CLogBase::GetFileName()
 	GetLocalTime(&t);
 
 	CString strFilePath=L"";
-	strFilePath.Format(L"[%04u-%02u-%02u]_%s.txt", t.wYear, t.wMonth, t.wDay, m_strFileName); 
+	strFilePath.Format(_T("[%04u-%02u-%02u]_%s.txt"), t.wYear, t.wMonth, t.wDay, m_strFileName); 
 
 	return strFilePath;
 }
@@ -40,8 +39,8 @@ bool CLogBase::WriteLogMsg(ELogType nLogType, CString strMsg)
 
 	switch(nLogType)
 	{
-		case LogType_NOM : strType = L"[NOM]"; break;
-		case LogType_ERR : strType = L"[ERR]"; break;
+		case eNOM : strType = _T("[NOM]"); break;
+		case eERR : strType = _T("[ERR]"); break;
 	}
 
 	if(m_bTime == true)
@@ -49,12 +48,12 @@ bool CLogBase::WriteLogMsg(ELogType nLogType, CString strMsg)
 		SYSTEMTIME t;
 		GetLocalTime(&t);
 		// For csv format.
-		strLogText.Format(L"%04u-%02u-%02u , %02u:%02u:%02u:%03u , %s , %s"	,t.wYear, t.wMonth, t.wDay
+		strLogText.Format(_T("%04u-%02u-%02u , %02u:%02u:%02u:%03u , %s , %s") ,t.wYear, t.wMonth, t.wDay
 																			,t.wHour, t.wMinute, t.wSecond, t.wMilliseconds, strType, strMsg);
 	}
 	else
 	{
-		strLogText.Format(L"%s, %s", strType, strMsg);
+		strLogText.Format(_T("%s, %s"), strType, strMsg);
 	}
 	
 	strMsg = strLogText;
@@ -68,31 +67,37 @@ bool CLogBase::Write(CString strBuffer)
 		return false;
 
 	FILE *file=NULL;
-	CString strFilePath=L"";
+	CString strFilePath=_T("");
 
-	strFilePath.Format(L"%s%s",m_strFolderPath,GetFileName());
+	strFilePath.Format(_T("%s%s"),m_strFolderPath,GetFileName());
 	
-	char cFilePath[MAX_BUFFER_SIZE]={0,};
-	CStringConvert::CStringToChar(strFilePath, cFilePath);
+	char* pFilePath=NULL;
+	ConvertCStringToChar(strFilePath, &pFilePath);
 
 	bool ret=false;
-	if(fopen_s( &file, cFilePath, "a+t" ) == 0 )
+	if(fopen_s( &file, pFilePath, "a+t" ) == 0 )
 	{
-		char cBuffer[MAX_BUFFER_SIZE]={0,};
-		CStringConvert::CStringToChar(strBuffer, cBuffer);
+		char* pBuffer=NULL;
+		ConvertCStringToChar(strBuffer, &pBuffer);
 		
-		fprintf(file, "%s\n", cBuffer);
+		fprintf(file, "%s\n", pBuffer);
 
 		fclose(file);
+
+		delete []pBuffer;
+		pBuffer = NULL;
 		ret = true;
 	}
 	else
 	{
 		CString msg=L"";
-		msg.Format(L"Log File open Fail! (%s)\n", strFilePath);
+		msg.Format(_T("Log File open Fail! (%s)\n"), strFilePath);
 		OutputDebugString(msg);
 		ret = false;
 	}
+
+	delete []pFilePath;
+	pFilePath = NULL;
 
 	SetBufferSize(m_nBufferSize);
 
@@ -135,24 +140,25 @@ CLogEx::~CLogEx(void)
 bool CLogEx::WriteLogMsg(ELogType nLogType, CString strFmt, ...)
 {
 	if (m_bInit == false) return false;
-	char cFmt[MAX_BUFFER_SIZE]={0,};
-	CStringConvert::CStringToChar(strFmt,cFmt);
+	char* pcFmt = NULL;
+	ConvertCStringToChar(strFmt,&pcFmt);
 
 	char buf[MAX_BUFFER_SIZE]={0,};
 	va_list vlist;
 	va_start(vlist, strFmt);
-	int len = vsprintf_s(buf, cFmt, vlist);
+	int len = vsprintf_s(buf, pcFmt, vlist);
 	va_end(vlist);
 
-	CString strTemp=L"";
+	delete []pcFmt;
+	pcFmt = NULL;
 
+	CString strTemp=_T("");
 	CString tmp = (CString)buf;
-	strTemp.Format(L"MSG: %s",tmp);
+	strTemp.Format(_T("%s"),tmp);
 
-	char cTemp[MAX_BUFFER_SIZE]={0,};
-	CStringConvert::CStringToChar(strTemp,cTemp);
+	/*ConvertCStringToChar(strTemp,pcFmt);
 
-	sprintf_s(buf,cTemp);
+	sprintf_s(buf,pcFmt);*/
 
 	return m_LogBase.WriteLogMsg(nLogType, strTemp);
 }
@@ -162,7 +168,7 @@ void CLogEx::SetFolderPathName(CString strPath, CString strName)
 	if (IsExistDir(strPath) == false)
 		CreateDir(strPath);
 	
-	strPath+=L"\\";
+	strPath+=_T("\\");
 
 	m_LogBase.SetFileName(strName);
 	m_LogBase.SetFolderPath(strPath);

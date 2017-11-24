@@ -42,9 +42,6 @@
     <ClInclude Include="Resource.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="StringConvert.h">
-      <Filter>include</Filter>
-    </ClInclude>
     <ClInclude Include="LogEx.h">
       <Filter>include</Filter>
     </ClInclude>

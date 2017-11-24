@@ -5,20 +5,34 @@
 //----------------------------------------------------------
 // Programmed by William Kim
 //----------------------------------------------------------
-// Last Update : 2016-10-19 09:31
+// Last Update : 2017-11-24 13:44
 // Modified by William Kim
 //----------------------------------------------------------
 
 #define MAX_BUFFER_SIZE 4096
 
-enum ELogType
-{
-	LogType_NOM,		// Normal.
-	LogType_ERR			// Error.
-};
 
+
+class CBase
+{
+public :
+	typedef enum  {eNOM=0, eERR	} ELogType;
+
+	void ConvertCStringToChar(CString strIn, char** pcOut)
+	{
+		//CString to char* //Unicode
+		wchar_t* wchar_str;     
+
+		int      char_str_len;  
+		wchar_str = strIn.GetBuffer(strIn.GetLength());
+
+		char_str_len = WideCharToMultiByte(CP_ACP, 0, wchar_str, -1, NULL, 0, NULL, NULL);
+		*pcOut = new char[char_str_len];
+		WideCharToMultiByte(CP_ACP, 0, wchar_str, -1, *pcOut, char_str_len, 0,0);
+	}
+};
 // Log base class.
-class CLogBase
+class CLogBase : public CBase
 {
 public:
 	CLogBase(void);
@@ -42,12 +56,14 @@ public:
 
 	bool WriteLogMsg(ELogType nLogType, CString strMsg);
 
-	bool Write(CString strBuffer=L"");
+	bool Write(CString strBuffer=_T(""));
+
 };
 
-class CLogEx
+class CLogEx : public CBase
 {
 public:
+
 	static CLogEx*	Instance();
 	static void		Release();
 private:

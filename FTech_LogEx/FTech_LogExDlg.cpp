@@ -43,8 +43,8 @@ BOOL CFTech_LogExDlg::OnInitDialog()
 	SetIcon(m_hIcon, TRUE);			// Set big icon
 	SetIcon(m_hIcon, FALSE);		// Set small icon
 
-	m_Log[Log_Error].SetFolderPathName(L"C:\\Log",L"ERROR");
-	m_Log[Log_Total].SetFolderPathName(L"C:\\Log",L"TOTAL");
+	m_Log[eError].SetFolderPathName(_T("C:\\Log"),_T("ERROR"));
+	m_Log[eTotal].SetFolderPathName(_T("C:\\Log"),_T("TOTAL"));
 
 	return TRUE;  // return TRUE  unless you set the focus to a control
 }
@@ -90,12 +90,12 @@ HCURSOR CFTech_LogExDlg::OnQueryDragIcon()
 void CFTech_LogExDlg::OnBnClickedButton1()
 {
 	// Total에도 같이 기록한다.
-	m_Log[Log_Error].WriteLogMsg(LogType_ERR, L"Error !!");
-	m_Log[Log_Total].WriteLogMsg(LogType_ERR, L"Error !!");
+	m_Log[eError].WriteLogMsg(CLogEx::eERR, _T("Error !!"));
+	m_Log[eTotal].WriteLogMsg(CLogEx::eERR, _T("Error !!"));
 }
 
 
 void CFTech_LogExDlg::OnBnClickedButton2()
 {
-	m_Log[Log_Total].WriteLogMsg(LogType_NOM, L"Normal !!");
+	m_Log[eTotal].WriteLogMsg(CLogEx::eNOM, _T("Normal !!"));
 }
